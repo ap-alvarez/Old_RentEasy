@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
-import { View, ScrollView, StyleSheet, Platform, Text, TextInput, Button } from 'react-native';
+import {
+  Button,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableHighlight,
+  View,
+} from 'react-native';
 import { StackNavigator, createStackNavigator } from 'react-navigation'
 
 const PersonalForm = [
@@ -18,6 +28,14 @@ const PersonalForm = [
     required: false,
   }
 ];
+
+const TestForm = [
+  {
+    type: 'multiSelector',
+    title: 'This is a test',
+    choices: ['oops', 'thanks', 'bye'],
+  }
+]
 
 const ContactForm = [
   {
@@ -38,21 +56,46 @@ const ContactForm = [
 
 const PersonalPage = {
   title: 'Personal Info',
-  formList: [PersonalForm, ContactForm]
+  formList: [PersonalForm, ContactForm, TestForm]
 };
 
 function singleTextInput(singleText) {
   let value = '';
   return (
-    <View style ={styles.formCompContainer}>
-      <Text style={styles.formSectionTitle}>{('title' in singleText) ? singleText.title : ''}</Text>
       <TextInput
         style={styles.textInput}
         placeHolder={('placeholder' in singleText) ? singleText.placeHolder : ''}
         onChangeText={(text) => {this.value=text}}
         value={this.value}
       />
-    </View>
+  );
+}
+
+function multiSelect(multiSelector) {
+  let value = '';
+  select = (newVal) =>
+  {
+    this.value = newVal;
+    //alert(newVal);
+  };
+
+  return (
+    multiSelector.choices.map((choice) => {
+      return(
+
+        <TouchableHighlight onPress={this.select(choice)}>
+          <View style={styles.multiChoice}>
+            <Image
+              style={styles.multiChoiceIcon}
+              source={require('./assets/multiChoiceIcon.png')}
+            />
+            <Text style={styles.multiChoiceLabel}>{choice}</Text>
+          </View>
+        </TouchableHighlight>
+
+      );
+    })
+
   );
 }
 
@@ -65,7 +108,28 @@ class FormPage extends React.Component {
   renderComponent (formComp) {
     switch (formComp.type) {
       case 'singleTextInput':
-        return (singleTextInput(formComp));
+        return (
+          <View style={styles.formCompContainer}>
+          <Text
+          fontSize={('fontSize' in formComp) ? formComp.fontSize : styles.formSectionTitle}
+          style={styles.formSectionTitle}>
+            {('title' in formComp) ? formComp.title : ''}
+          </Text>
+            {singleTextInput(formComp)}
+          </View>
+        );
+        break;
+      case 'multiSelector':
+        return (
+          <View style={styles.formCompContainer}>
+          <Text
+          fontSize={('fontSize' in formComp) ? formComp.fontSize : styles.formSectionTitle}
+          style={styles.formSectionTitle}>
+            {('title' in formComp) ? formComp.title : ''}
+          </Text>
+            {multiSelect(formComp)}
+          </View>
+        );
         break;
     }
   }
@@ -149,7 +213,6 @@ const styles = StyleSheet.create({
 
     color: '#5D737F',
     fontSize: 21,
-    fontWeight: '100',
   },
 
   textInput: {
@@ -160,7 +223,26 @@ const styles = StyleSheet.create({
 
     color: '#5D737F',
     fontSize: 21,
-    fontWeight: '100',
+    fontFamily: 'serif',
+  },
+
+  multiChoice: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+
+  multiChoiceIcon: {
+    height: 30,
+    width: 30,
+    margin: 10,
+    color: 'blue'
+  },
+
+  multiChoiceLabel: {
+    color: '#5D737F',
+    fontSize: 21,
+    fontFamily: 'serif'
   },
 
   headText: {
