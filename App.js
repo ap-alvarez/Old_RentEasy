@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, ScrollView, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native';
-import { StackNavigator, createStackNavigator } from 'react-navigation'
+import { StackNavigator, createStackNavigator } from 'react-navigation';
+
 
 const TestForm = () => {
     return (
@@ -17,6 +18,24 @@ const TestForm = () => {
           options={['First Option', 'Second Option', 'Third Option', 'Option Accepts Multiline']}
           valuesAcceptInput={['Option Accepts Multiline']}
           hasMultiline={true}/>
+      </View>
+    );
+}
+
+const PetForm = () => {
+    return (
+      <View style={styles.formContainer}>
+        <CompSingleSelection
+          name='Type'
+          options={['Dog', 'Cat', 'Other']}
+          valuesAcceptInput={['Other']} />
+        <CompTextInput
+          name='Breed'/>
+        <CompTextInput
+          name='Age'/>
+        <CompSingleSelection
+            name='Gender'
+            options={['Male', 'Female', 'Unknown']} />
       </View>
     );
 }
@@ -60,7 +79,6 @@ export default class App extends React.Component {
  }
 }
 
-
 class FormNavigator extends React.Component {
 
   constructor (props)
@@ -82,13 +100,40 @@ class FormNavigator extends React.Component {
           name:'Test Form',
           form: TestForm()
         }]
+      },{
+        groupName: 'Pets',
+        forms: [],
+        dynamicForm: {
+            name: 'Pet',
+            form: PetForm()
+        }
       }],
     }
+  }
+
+  addForm(groupName)
+  {
+    let newFormGroups = this.state.formGroups;
+    for (i = 0; i < newFormGroups.length; i++)
+    {
+      if (newFormGroups[i].groupName === groupName)
+      {
+        console.log(groupName);
+        let newForm = newFormGroups[i].dynamicForm;
+        if (newForm != null)
+        {
+          newFormGroups[i].forms.push({name: newForm.name, form: newForm.form});
+        }
+        break;
+      }
+    }
+    this.setState({formGroups: newFormGroups});
   }
 
   render() {
     return (this.state.formGroups.map((group) =>
       <View style={styles.formContainer} key={group.groupName}>
+        
         {group.forms.map((form) =>
           <Button
             title={form.name}
@@ -99,6 +144,11 @@ class FormNavigator extends React.Component {
             })}
             key={form.name}
           />)}
+        {(group.dynamicForm != null) ?
+          <Button
+            title={'Add ' + group.dynamicForm.name}
+            onPress={() => this.addForm(group.groupName)}
+            style={styles.navButton} /> : null}
       </View>
     ));
   }
@@ -178,7 +228,7 @@ class CompSingleSelection extends React.Component{
             key={option}
             onChange={this._onChange}
             selectedValue={this.selectedValue}
-            input={(this.props.valuesAcceptInput.indexOf(option) > -1) ? (
+            input={(this.props.valuesAcceptInput && this.props.valuesAcceptInput.indexOf(option) > -1) ? (
               <TextInput
                 style={(this.props.hasMultiline) ? styles.multilineTextInput : styles.textInput}
                 onChangeText={(inputValue) => this.setState({inputValue})}
